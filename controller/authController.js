@@ -86,7 +86,7 @@ const signin = async (req, res, next) => {
       secure: process.env.NODE_ENV === "production", // HTTPS only in production
       sameSite: "strict", // Protects against CSRF
       maxAge: 60 * 60 * 1000, // 1 hour in milliseconds (matching token expiry)
-      path: '/'
+      domain: '.onrender.com'
     });
     
     const { password: pass, ...userWithoutPassword } = foundUser._doc;
