@@ -29,11 +29,11 @@ const signup = async (req, res, next) => {
     });
     const accessToken = jwt.sign(
       {
-        id: existingUser.id,
-        username: existingUser.username,
-        admin: existingUser.admin,
-        email:existingUser.email,
-        profilePicture:existingUser.profilePicture
+        id: user.id,
+        username: user.username,
+        admin: user.admin,
+        email:user.email,
+        profilePicture:user.profilePicture
       },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "1h" }
@@ -42,10 +42,9 @@ const signup = async (req, res, next) => {
     // Set cookie with proper options for persistence
     res.cookie("jwt", accessToken, {
       httpOnly: true, // Prevents JavaScript access to the cookie
-      secure: process.env.NODE_ENV === "production", // HTTPS only in production
-      sameSite: "strict", // Protects against CSRF
-      maxAge: 60 * 60 * 1000, // 1 hour in milliseconds (matching token expiry)
-      domain: '.onrender.com'
+      secure: true, // Always use secure in production
+      sameSite: 'none', // Allow cross-site cookie setting
+      maxAge: 60 * 60 * 1000 // 1 hour in milliseconds
     });
     return res.status(200).json({ message: "user created successfully", user });
   } catch (err) {
@@ -83,10 +82,9 @@ const signin = async (req, res, next) => {
     // Set cookie with proper options for persistence
     res.cookie("jwt", accessToken, {
       httpOnly: true, // Prevents JavaScript access to the cookie
-      secure: process.env.NODE_ENV === "production", // HTTPS only in production
-      sameSite: "strict", // Protects against CSRF
-      maxAge: 60 * 60 * 1000, // 1 hour in milliseconds (matching token expiry)
-      domain: '.onrender.com'
+      secure: true, // Always use secure in production
+      sameSite: 'none', // Allow cross-site cookie setting
+      maxAge: 60 * 60 * 1000 // 1 hour in milliseconds
     });
     
     const { password: pass, ...userWithoutPassword } = foundUser._doc;
