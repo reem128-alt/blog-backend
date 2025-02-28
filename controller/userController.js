@@ -2,6 +2,13 @@ const User = require("../model/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const errorHandler = require("../middleware/error");
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const getUsers = async (req, res, next) => {
   if (!req.user.admin) {
@@ -116,34 +123,35 @@ const updateUser = async (req, res, next) => {
   }
 };
 
-const updateUserProfile=async(req,res,next)=>{
- try{
-  if (!req.file){
-    return next(errorHandler(400,"no profule picture"))
+const updateUserProfile = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return next(errorHandler(400, "No profile picture provided"));
+    }
+    const uploadResponse = await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`, {
+      folder: 'user_profiles'
+    });
+    const userId = req.user.id;
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profilePicture: uploadResponse.url },
+      { new: true }
+    );
+    if (!updatedUser) {
+      return next(errorHandler(404, "User not found"));
+    }
+    const userWithoutPassword = updatedUser.toObject();
+    delete userWithoutPassword.password;
+    res.status(200).json({
+      message: "Profile picture updated successfully",
+      user: userWithoutPassword,
+      profilePicture: uploadResponse.url
+    });
+  } catch (error) {
+    console.error("Error updating profile picture:", error);
+    next(errorHandler(500, error.message || "An unexpected error occurred"));
   }
-  const userId=req.user.id
-  const updatedUser=await User.findByIdAndUpdate(
-    userId,
-    {profilePicture:req.file.path},
-    {new:true}
-  )
-  if (!updatedUser) {
-    return next(errorHandler(404, "User not found"));
-  }
-
-  // Convert to plain object and remove password
-  const userWithoutPassword = updatedUser.toObject();
-  delete userWithoutPassword.password;
-
-  res.status(200).json({
-    message: "Profile picture updated successfully",
-    user: userWithoutPassword,
-  });
-} catch (error) {
-  next(error);
-}
-
-}
+};
 
 const deleteUser = async (req, res, next) => {
   const userId = req.params.userId;
@@ -168,9 +176,6 @@ const deleteUser = async (req, res, next) => {
     next(err);
   }
 };
-
-
-
 
 module.exports = {
   getUsers,
