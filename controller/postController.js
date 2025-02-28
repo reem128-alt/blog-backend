@@ -1,5 +1,12 @@
 const Post = require("../model/Post");
 const errorHandler = require("../middleware/error");
+const cloudinary=require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const createPost = async (req, res, next) => {
   try {
@@ -11,7 +18,11 @@ const createPost = async (req, res, next) => {
 
     let imagePath = null;
     if (req.file) {
-      imagePath = req.file.path;
+      console.log(req.file)
+      const result = await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`, {
+        folder: 'posts'
+      } );
+      imagePath = result.url;
     }
 
     const slug = title.split(" ").join("-").toLowerCase();
@@ -22,7 +33,7 @@ const createPost = async (req, res, next) => {
       title,
       slug,
       category,
-      image: imagePath,
+      image:imagePath,
     });
 
     return res.status(201).json(newPost);
@@ -80,26 +91,41 @@ const deletePost = async (req, res, next) => {
 };
 
 const updatePost = async (req, res, next) => {
- 
   try {
-    const updateData = { ...req.body };
-    if (req.file) {
-      updateData.image = req.file.path;
+    const { id } = req.params;
+    const { title, slug, category } = req.body;
+    const post = await Post.findById(id);
+
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
     }
 
+    // Delete old image if it exists
+    if (post.image) {
+      const publicId = post.image.split('/').pop().split('.')[0];
+      await cloudinary.uploader.destroy(publicId);
+    }
+
+    // Upload new image if provided
+    let imagePath = post.image;
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`, {
+        folder: 'posts'
+      } );
+      imagePath = result.url;
+    }
+
+    // Update post
     const updatedPost = await Post.findByIdAndUpdate(
-      req.params.postId,
-      updateData,
+      id,
+      { title, slug, category, image: imagePath },
       { new: true }
     );
 
-    if (!updatedPost) {
-      return next(errorHandler(404, "Post not found"));
-    }
-
-    res.status(200).json(updatedPost);
-  } catch (error) {
-    next(error);
+    return res.status(200).json(updatedPost);
+  } catch (err) {
+    next(err);
   }
 };
+
 module.exports = { createPost, getAllPosts, deletePost, updatePost };
