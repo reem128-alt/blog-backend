@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 
 const verifyJwt = async (req, res, next) => {
   const token = req.cookies.jwt;
-  console.log(req.cookies.jwt);
+  
   if (!token) {
     return next(errorHandler(401, "unauthorized"));
   }
@@ -12,7 +12,7 @@ const verifyJwt = async (req, res, next) => {
       return next(errorHandler(401, "unauthorized"));
     }
     req.user = decoded;
-    console.log(decoded);
+   
     next();
   });
 };
