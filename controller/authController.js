@@ -5,7 +5,6 @@ const errorHandler = require("../middleware/error");
 
 const signup = async (req, res, next) => {
   const { email, username, password } = req.body;
-  console.log(req.body);
   if (!email || !username || !password) {
     return next(errorHandler(400, "please enter all fields"));
   }
