@@ -7,7 +7,7 @@ const verifyJwt = require("../middleware/verifyJwt");
 router.use(verifyJwt);
 router.post("/", upload.single("image"), PostController.createPost);
 router.get("/", PostController.getAllPosts);
-router.delete("/:postId", PostController.deletePost);
-router.put("/:postId", upload.single("image"), PostController.updatePost);
+router.delete("/:postId", upload.single("image"),PostController.deletePost);
+router.put("/:id", upload.single("image"), PostController.updatePost);
 
 module.exports = router;
