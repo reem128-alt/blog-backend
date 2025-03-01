@@ -7,20 +7,24 @@ const userRoute = require("./routes/userRoute");
 const postRoute = require("./routes/postRoute");
 const commentRoute = require("./routes/commentRoute");
 const cors = require("cors");
-
 const cookieParser = require("cookie-parser");
 
 const app = express();
 dbConnect();
 app.use(
   cors({
-    origin:"*",
+    origin: [
+      "http://localhost:5173", 
+      "https://blog-beta-seven-98.vercel.app/",
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     exposedHeaders: ['set-cookie']
   })
 );
+
+
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/", express.static(path.join(__dirname, "public")));
