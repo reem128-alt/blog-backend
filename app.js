@@ -14,7 +14,7 @@ const app = express();
 dbConnect();
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://blog-seven-sigma-81.vercel.app/","https://blog-git-main-reens-projects-1d687ebf.vercel.app/"],
+    origin: ["http://localhost:5173", "https://blog-seven-sigma-81.vercel.app"],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
