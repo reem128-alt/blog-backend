@@ -15,7 +15,9 @@ const createPost = async (req, res, next) => {
     if (!content || !title) {
       return next(errorHandler(400, "Please enter all required fields"));
     }
-
+    const uploadOptions = {
+      folder: "posts",
+    };
     let imagePath = null;
     if (req.file) {
       console.log(req.file) 
