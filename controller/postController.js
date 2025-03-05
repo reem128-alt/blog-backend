@@ -18,11 +18,17 @@ const createPost = async (req, res, next) => {
 
     let imagePath = null;
     if (req.file) {
-      console.log(req.file)
-      const result = await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`, {
-        folder: 'posts'
-      } );
-      imagePath = result.url;
+      console.log(req.file) 
+      const result = req.file.buffer
+      ? await cloudinary.uploader.upload(
+          `data:${req.file.mimetype};base64,${req.file.buffer.toString(
+            "base64"
+          )}`,
+          uploadOptions
+        )
+      : await cloudinary.uploader.upload(req.file.path, uploadOptions);
+
+          imagePath = result.url;
     }
 
     const slug = title.split(" ").join("-").toLowerCase();
@@ -78,8 +84,10 @@ const deletePost = async (req, res, next) => {
       return next(errorHandler(404, "Post not found"));
     }
 
+    console.log('Post:', post); // Log the post object
+
     // Allow both admin and post owner to delete
-    if (!req.user.admin && post.userId.toString() !== req.user.id) {
+    if (!req.user.admin && (!post.userId || post.userId.toString() !== req.user.id)) {
       return next(errorHandler(403, "You can only delete your own posts"));
     }
 
