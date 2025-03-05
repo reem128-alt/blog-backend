@@ -103,7 +103,7 @@ const deletePost = async (req, res, next) => {
 const updatePost = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { title, slug, category } = req.body;
+    const { title, slug, category ,content} = req.body;
     const post = await Post.findById(id);
 
     if (!post) {
@@ -116,19 +116,27 @@ const updatePost = async (req, res, next) => {
       await cloudinary.uploader.destroy(publicId);
     }
 
-    // Upload new image if provided
+    const uploadOptions = {
+      folder: "posts",
+    };
     let imagePath = post.image;
     if (req.file) {
-      const result = await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`, {
-        folder: 'posts'
-      } );
-      imagePath = result.url;
+      const result = req.file.buffer
+      ? await cloudinary.uploader.upload(
+          `data:${req.file.mimetype};base64,${req.file.buffer.toString(
+            "base64"
+          )}`,
+          uploadOptions
+        )
+      : await cloudinary.uploader.upload(req.file.path, uploadOptions);
+
+          imagePath = result.url;
     }
 
     // Update post
     const updatedPost = await Post.findByIdAndUpdate(
       id,
-      { title, slug, category, image: imagePath },
+      { title, slug, category,content, image: imagePath },
       { new: true }
     );
 
