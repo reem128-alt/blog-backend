@@ -124,17 +124,28 @@ const updateUser = async (req, res, next) => {
 };
 
 const updateUserProfile = async (req, res, next) => {
+  
   try {
-    if (!req.file) {
-      return next(errorHandler(400, "No profile picture provided"));
+    const uploadOptions = {
+      folder: "users",
+    };
+    let imagePath = null;
+    if (req.file) {
+      const result = req.file.buffer
+      ? await cloudinary.uploader.upload(
+          `data:${req.file.mimetype};base64,${req.file.buffer.toString(
+            "base64"
+          )}`,
+          uploadOptions
+        )
+      : await cloudinary.uploader.upload(req.file.path, uploadOptions);
+
+          imagePath = result.url;
     }
-    const uploadResponse = await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`, {
-      folder: 'user_profiles'
-    });
     const userId = req.user.id;
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { profilePicture: uploadResponse.url },
+      { profilePicture: imagePath },
       { new: true }
     );
     if (!updatedUser) {
@@ -145,7 +156,7 @@ const updateUserProfile = async (req, res, next) => {
     res.status(200).json({
       message: "Profile picture updated successfully",
       user: userWithoutPassword,
-      profilePicture: uploadResponse.url
+      profilePicture: imagePath
     });
   } catch (error) {
     console.error("Error updating profile picture:", error);
