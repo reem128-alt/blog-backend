@@ -16,7 +16,7 @@ app.use(
     origin: [
       "http://localhost:5173", 
       "https://blog-beta-seven-98.vercel.app",
-      "https://blog-backend-myeh.onrender.com"
+      "https://blog-one-virid-60.vercel.app"
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -40,4 +40,5 @@ app.use("/comments", commentRoute);
 app.listen(3000, () => {
   console.log("server is running");
 });
+
 
