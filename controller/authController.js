@@ -34,7 +34,7 @@ const signup = async (req, res, next) => {
         email:user.email,
         profilePicture:user.profilePicture
       },
-      process.env.ACCESS_TOKEN_SECRET,
+      process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
@@ -74,7 +74,7 @@ const signin = async (req, res, next) => {
         email:foundUser.email,
         profilePicture:foundUser.profilePicture
       },
-      process.env.ACCESS_TOKEN_SECRET,
+      process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 

@@ -98,7 +98,7 @@ const updateUser = async (req, res, next) => {
         email: updatedUser.email,
         profilePicture: updatedUser.profilePicture
       },
-      process.env.ACCESS_TOKEN_SECRET,
+      process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 

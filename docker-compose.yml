@@ -1,0 +1,62 @@
+version: "3.8"
+
+services:
+  # MongoDB service
+  mongodb:
+    image: mongo
+    container_name: blog-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: reem
+      MONGO_INITDB_ROOT_PASSWORD: Reem1994
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - blog-network
+
+  # Backend service
+  backend:
+    build: .
+    container_name: blog-backend
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URL=${MONGODB_URL:-mongodb://reem:Reem1994@mongodb:27017/blog?authSource=admin}
+      - JWT_SECRET=${JWT_SECRET:-your-secret-key-here}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - PORT=${PORT:-3000}
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      - mongodb
+    networks:
+      - blog-network
+
+  # Nginx service
+  nginx:
+    image: nginx:alpine
+    container_name: blog-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./uploads:/usr/share/nginx/uploads:ro
+    depends_on:
+      - backend
+    networks:
+      - blog-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  blog-network:
+    driver: bridge
