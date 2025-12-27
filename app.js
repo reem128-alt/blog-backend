@@ -14,18 +14,16 @@ dbConnect();
 app.use(
   cors({
     origin: [
-      "http://localhost:5173", 
+      "http://localhost:5173",
       "https://blog-beta-seven-98.vercel.app",
-      "https://blog-one-virid-60.vercel.app"
+      "https://blog-three-rho-16.vercel.app",
     ],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['set-cookie']
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["set-cookie"],
   })
 );
-
-
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/", express.static(path.join(__dirname, "public")));
@@ -40,5 +38,3 @@ app.use("/comments", commentRoute);
 app.listen(3000, () => {
   console.log("server is running");
 });
-
-
